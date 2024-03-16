@@ -2,15 +2,18 @@
 package com.techacademy.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -21,6 +24,9 @@ import lombok.Data;
 @SQLRestriction("delete_flg = false")
 public class Employee {
 
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+    private List<Report> reportList;
+    
     public static enum Role {
         GENERAL("一般"), ADMIN("管理者");
 
