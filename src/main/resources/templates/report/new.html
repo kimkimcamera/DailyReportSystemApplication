@@ -51,9 +51,9 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="content">内容</label>
                                         <p class="mb-1"></p>
-                                        <div class="col-md-4">
-                                            <input class="form-control" type="text" th:field="*{content}"
-                                                th:errorclass="err">
+                                        <div class="col-md-9">
+                                            <textarea class="form-control" th:field="*{content}" th:errorclass="err" id="content"
+                                                name="reportContent" rows="5"></textarea>
                                         </div>
                                     </div>
                                 </div>
