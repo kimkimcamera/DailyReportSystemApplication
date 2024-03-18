@@ -28,13 +28,7 @@ public class Report {
     
     // ID
     @Id
-    @NotNull
     private Integer id;
-    
-    //従業員の名前
-    @Column(nullable = false)
-    @NotEmpty
-    private String name;
 
     // 日付
     @NotNull
@@ -49,6 +43,7 @@ public class Report {
 
     // 内容
     @Column(columnDefinition="LONGTEXT", nullable = false)
+    @NotEmpty
     private String content;
 
     // 削除フラグ(論理削除を行うため)

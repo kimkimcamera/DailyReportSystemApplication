@@ -18,6 +18,7 @@ import com.techacademy.constants.ErrorMessage;
 
 import com.techacademy.entity.Report;
 import com.techacademy.service.ReportService;
+import com.techacademy.service.UserDetail;
 
 @Controller
 @RequestMapping("report")
@@ -47,25 +48,26 @@ public class ReportController {
 
     //日報新規登録画面
     @GetMapping(value = "/add")
-    public String create(@ModelAttribute Report report) {
-
+    public String create(@ModelAttribute Report report, @AuthenticationPrincipal UserDetail userDetail) {
+        report.setEmployee(userDetail.getEmployee());
         return "report/new";
     }
 
     // 日報新規登録処理
     @PostMapping(value = "/add")
-    public String add(@Validated Report report, BindingResult res, Model model) {
+    public String add(@Validated Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
         // 入力チェック
         if (res.hasErrors()) {
-            return create(report);
+            return create(report, userDetail);
         }
         
-        ErrorKinds result = reportService.save(report);
+        report.setEmployee(userDetail.getEmployee());
+        ErrorKinds result = reportService.save(report, userDetail);
         if(result != ErrorKinds.SUCCESS) {
-            return "redirect:/report/add";
+            return create(report, userDetail);
         }
 
-        return "redirect:/report";
+        return "redirect:/report/list";
     }
 
 //    // 日報削除処理
@@ -108,7 +110,7 @@ public class ReportController {
 //            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
 //            return create(report);
 //        }
-//        return "redirect:/reports/list";
+//        return "redirect:/report/list";
 //        
 //    }
     

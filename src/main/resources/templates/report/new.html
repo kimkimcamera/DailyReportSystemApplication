@@ -27,14 +27,14 @@
                                         <div class="col-md-7">
                                             <input class="form-control datepicker" type="date" id="report_date" th:field="*{reportDate}"
                                                    th:errorclass="err" name="reportDate">
+                                            <span th:errors="*{reportDate}" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label" for="name">氏名</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <input class="form-control" type="text" th:field="*{name}" th:errorclass="err" id="name" name="reportName">
-                                            <span th:errors="*{name}" class="text-danger"></span>
+                                            <span class="form-control" th:text="*{employee.name}"></span>
                                         </div>
                                     </div>
                                    <div class="mb-3">
@@ -52,6 +52,7 @@
                                         <div class="col-md-10">
                                             <textarea class="form-control" th:field="*{content}" th:errorclass="err" id="content"
                                                 name="reportContent" rows="5"></textarea>
+                                            <span th:errors="*{content}" class="text-danger"></span>
                                         </div>
                                     </div>
                                 </div>

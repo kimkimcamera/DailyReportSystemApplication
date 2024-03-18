@@ -1,5 +1,6 @@
 package com.techacademy.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,22 +35,18 @@ public class ReportService {
 
     // 日報保存
     @Transactional
-    public ErrorKinds save(Report report) {
-
-        ErrorKinds validationResult = validateReport(report);
-        if (validationResult != ErrorKinds.CHECK_OK) {
-            return validationResult;
+    public ErrorKinds save(Report report, UserDetail userDetail) {
+        
+        String loggedInEmployeeCode = userDetail.getUsername();
+        LocalDate reportDate = report.getReportDate();
+        
+        // ログイン中の従業員のコードと入力された日付の日報を検索する
+        Report existingReport = reportRepository.findByReportDateAndEmployeeCode(reportDate, loggedInEmployeeCode);
+        if (existingReport != null) {
+            // 既存の日報が存在する場合はエラーを返す
+            return ErrorKinds.DATECHECK_ERROR;
         }
         
-        try {
-            reportRepository.save(report);
-            return ErrorKinds.SUCCESS;
-        } catch (Exception ex) {
-            return ErrorKinds.DUPLICATE_EXCEPTION_ERROR;
-        }
-    }
-        
-        private ErrorKinds validateReport(Report report) {
             if (report.getReportDate() == null || report.getTitle().isEmpty() || report.getContent().isEmpty()) {
             return ErrorKinds.BLANK_ERROR;
         }
@@ -61,9 +58,14 @@ public class ReportService {
         if (report.getContent().length() > 600) {
             return ErrorKinds.RANGECHECK_ERROR;
         }
-        
-        return ErrorKinds.CHECK_OK;
+        try {
+            reportRepository.save(report);
+            return ErrorKinds.SUCCESS;
+        } catch (Exception ex) {
+            return ErrorKinds.DUPLICATE_EXCEPTION_ERROR;
         }
+        
+    }
 }
 //
 //    
