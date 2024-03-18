@@ -58,6 +58,10 @@ public class ReportService {
         if (report.getContent().length() > 600) {
             return ErrorKinds.RANGECHECK_ERROR;
         }
+        
+        //createdAtフィールドに現在の日時をセットする
+        report.setCreatedAt(LocalDateTime.now());
+        
         try {
             reportRepository.save(report);
             return ErrorKinds.SUCCESS;
