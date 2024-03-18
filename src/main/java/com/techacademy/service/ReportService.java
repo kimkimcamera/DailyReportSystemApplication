@@ -62,6 +62,9 @@ public class ReportService {
         //createdAtフィールドに現在の日時をセットする
         report.setCreatedAt(LocalDateTime.now());
         
+        //updatedAtフィールドに現在の日時をセットする
+        report.setUpdatedAt(LocalDateTime.now());
+        
         try {
             reportRepository.save(report);
             return ErrorKinds.SUCCESS;
