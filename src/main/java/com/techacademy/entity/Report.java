@@ -55,12 +55,10 @@ public class Report {
 
     // 登録日時
     @Column(nullable = false)
-    @NotNull
     private LocalDateTime createdAt;
 
     // 更新日時
     @Column(nullable = false)
-    @NotNull
     private LocalDateTime updatedAt;
     
     @ManyToOne

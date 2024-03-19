@@ -49,7 +49,7 @@ public class Employee {
     private String code;
 
     // 名前
-    @Column(length = 20, nullable = false)
+    @Column(name = "name", length = 20, nullable = false)
     @NotEmpty
     @Length(max = 20)
     private String name;

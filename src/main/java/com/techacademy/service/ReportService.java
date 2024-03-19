@@ -66,6 +66,8 @@ public class ReportService {
         report.setUpdatedAt(LocalDateTime.now());
         
         try {
+            //従業員の名前をセットする
+            String name = report.getEmployee().getName();
             reportRepository.save(report);
             return ErrorKinds.SUCCESS;
         } catch (Exception ex) {

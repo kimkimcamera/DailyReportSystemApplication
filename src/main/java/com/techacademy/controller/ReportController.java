@@ -35,6 +35,7 @@ public class ReportController {
     @GetMapping("/list")
     public String getList(Model model) {
         model.addAttribute("reportList", reportService.findAll());
+        model.addAttribute("report", new Report());
         return "report/list";
     }
 
@@ -48,8 +49,11 @@ public class ReportController {
 
     //日報新規登録画面
     @GetMapping(value = "/add")
-    public String create(@ModelAttribute Report report, @AuthenticationPrincipal UserDetail userDetail) {
-        report.setEmployee(userDetail.getEmployee());
+    public String create(@ModelAttribute Report report, @AuthenticationPrincipal UserDetail userDetail, Model model) {
+        Report newReport = new Report();
+        newReport.setEmployee(userDetail.getEmployee());
+        newReport.setEmployeeName(userDetail.getEmployee().getName());
+        model.addAttribute("report", newReport);
         return "report/new";
     }
 
@@ -58,13 +62,21 @@ public class ReportController {
     public String add(@Validated Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
         // 入力チェック
         if (res.hasErrors()) {
-            return create(report, userDetail);
+            //エラーがある場合、新しいReportオブジェクトを作成してフォームに渡す
+            Report newReport = new Report();
+            newReport.setEmployee(userDetail.getEmployee());
+            model.addAttribute("report", newReport);
+            return "report/new";
         }
         
         report.setEmployee(userDetail.getEmployee());
         ErrorKinds result = reportService.save(report, userDetail);
         if(result != ErrorKinds.SUCCESS) {
-            return create(report, userDetail);
+          //エラーがある場合、新しいReportオブジェクトを作成してフォームに渡す
+            Report newReport = new Report();
+            newReport.setEmployee(userDetail.getEmployee());
+            model.addAttribute("report", newReport);
+            return "report/new";
         }
 
         return "redirect:/report/list";
