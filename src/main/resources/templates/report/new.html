@@ -34,7 +34,9 @@
                                         <label class="form-label" for="name">氏名</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <span class="form-control" th:text="${userDetail.employee.name}"></span>
+                                            <th:block th:if="${userDetail != null}">
+                                                <span class="form-control" th:text="${userDetail.employee.name}"></span>
+                                            </th:block>
                                         </div>
                                     </div>
                                    <div class="mb-3">

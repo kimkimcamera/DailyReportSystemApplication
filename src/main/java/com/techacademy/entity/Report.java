@@ -64,5 +64,21 @@ public class Report {
     @ManyToOne
     @JoinColumn(name = "employee_code", referencedColumnName = "code", nullable = false)
     private Employee employee;
+    
+    // 従業員の名前を取得するメソッド
+    public String getEmployeeName() {
+        if (this.employee != null) {
+            return this.employee.getName();
+        } else {
+            return null; // エラー処理などに応じてnullを返すか、適切なデフォルト値を返します。
+        }
+    }
+    
+    public void setEmployeeName(String name) {
+        if (this.employee == null) {
+            this.employee = new Employee();
+        }
+        this.employee.setName(name);
+    }
 
 }
