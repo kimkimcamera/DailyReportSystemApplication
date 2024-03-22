@@ -20,8 +20,12 @@ public class UserDetail implements UserDetails {
         this.employee = employee;
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority(employee.getRole().toString()));
-        this.authorities = authorities;
+        if (employee != null && employee.getRole() != null) {
+            authorities.add(new SimpleGrantedAuthority(employee.getRole().toString()));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_DEFAULT"));
+        }
+            this.authorities = authorities;
     }
 
     public Employee getEmployee() {

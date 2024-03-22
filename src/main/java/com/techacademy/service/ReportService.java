@@ -4,15 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.techacademy.constants.ErrorKinds;
-import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.repository.ReportRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +22,10 @@ public class ReportService {
     @Autowired
     public ReportService(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
-
+    }
+    
+    public Optional<Report> findById(Integer id) {
+        return reportRepository.findById(id);
     }
     
     // 日報一覧表示処理
@@ -35,29 +35,17 @@ public class ReportService {
 
     // 日報保存
     @Transactional
-    public ErrorKinds save(Report report, UserDetail userDetail) {
+    public ErrorKinds save(Report report) {
         
-        String loggedInEmployeeCode = userDetail.getUsername();
         LocalDate reportDate = report.getReportDate();
         
         // ログイン中の従業員のコードと入力された日付の日報を検索する
-        Report existingReport = reportRepository.findByReportDateAndEmployeeCode(reportDate, loggedInEmployeeCode);
+        Report existingReport = reportRepository.findByReportDateAndEmployee(reportDate, report.getEmployee());
         if (existingReport != null) {
             // 既存の日報が存在する場合はエラーを返す
             return ErrorKinds.DATECHECK_ERROR;
         }
         
-            if (report.getReportDate() == null || report.getTitle().isEmpty() || report.getContent().isEmpty()) {
-            return ErrorKinds.BLANK_ERROR;
-        }
-        
-        if (report.getTitle().length() > 100) {
-            return ErrorKinds.RANGECHECK_ERROR;
-        }
-        
-        if (report.getContent().length() > 600) {
-            return ErrorKinds.RANGECHECK_ERROR;
-        }
         
         //createdAtフィールドに現在の日時をセットする
         report.setCreatedAt(LocalDateTime.now());
@@ -65,9 +53,9 @@ public class ReportService {
         //updatedAtフィールドに現在の日時をセットする
         report.setUpdatedAt(LocalDateTime.now());
         
+        report.setDeleteFlg(false);
+        
         try {
-            //従業員の名前をセットする
-            String name = report.getEmployee().getName();
             reportRepository.save(report);
             return ErrorKinds.SUCCESS;
         } catch (Exception ex) {
@@ -75,24 +63,58 @@ public class ReportService {
         }
         
     }
+
+    // 日報削除
+    @Transactional
+    public ErrorKinds delete(Integer id, UserDetail userDetail) {
+        try {
+            Optional<Report> optionalReport = reportRepository.findById(id);
+            if (optionalReport.isPresent()) {
+            Report report = optionalReport.get();
+            report.setDeleteFlg(true);
+            report.setUpdatedAt(LocalDateTime.now());
+            reportRepository.delete(report);
+            return ErrorKinds.SUCCESS;
+        } else {
+            return ErrorKinds.BLANK_ERROR;
+        }
+            } catch (DataIntegrityViolationException e) {
+            return ErrorKinds.BLANK_ERROR;
+        }
+    }
+  
+    // 日報情報更新処理
+    @Transactional
+    public ErrorKinds update(Integer id, Report updateReport, UserDetail userDetail) {
+        
+        Optional<Report> optionalReport = reportRepository.findById(id);
+        
+        if (optionalReport.isPresent()) {
+            Report reportToUpdate = optionalReport.get();
+            
+            if(!reportToUpdate.getReportDate().equals(updateReport.getReportDate())) {
+             // ログイン中の従業員のコードと入力された日付の日報を検索する
+                Report existingReport = reportRepository.findByReportDateAndEmployee(updateReport.getReportDate(), updateReport.getEmployee());
+                if (existingReport != null) {
+                    // 既存の日報が存在する場合はエラーを返す
+                    return ErrorKinds.DATECHECK_ERROR;
+                }
+            }
+            reportToUpdate.setReportDate(updateReport.getReportDate());
+            reportToUpdate.setTitle(updateReport.getTitle());
+            reportToUpdate.setContent(updateReport.getContent());
+            reportToUpdate.setUpdatedAt(updateReport.getUpdatedAt());
+        
+            //updatedAtフィールドに現在の日時をセットする
+            reportToUpdate.setUpdatedAt(LocalDateTime.now());
+            
+            reportRepository.save(reportToUpdate);
+        
+            return ErrorKinds.SUCCESS;
+        } else {
+            return ErrorKinds.BLANK_ERROR;
+        }
+    
+    }
 }
-//
-//    
-//    // 日報情報更新処理
-//    @Transactional
-//    public ErrorKinds update(String code, Report updateReport) {
-//        Report reportToUpdate = findByCode(code);
-//        
-//        if (reportToUpdate == null) {
-//            return ErrorKinds.BLANK_ERROR;
-//        }
-//        
-//        reportToUpdate.set(updateReport.get());
-//        reportToUpdate.setTitle(updateReport.getTitle());
-//        reportToUpdate.setContent(updateReport.getContent());
-//        
-//        ReportRepository.save(reportToUpdate);
-//        
-//        return ErrorKinds.SUCCESS;
-//    }
-//
+

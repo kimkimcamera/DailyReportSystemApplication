@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html class="h-100" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="common/header :: head_fragment(title=日報 更新)">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+<head th:replace="common/header :: head_fragment(title='日報 更新')">
 </head>
 
 <body class="h-100 overflow-hidden">
@@ -19,23 +17,25 @@
                 <div class="col-xl-12">
                     <div class="card">
                         <div class="card-body">
-                            <form th:action="@{/report}" th:object="${report}" th:method="post">
+                            <form th:action="@{'/report/' + ${report.id} + '/update'}" th:object="${report}" th:method="post">
                                 <div class="wizard wizard-success mb-4">
                                     <div class="mb-3">
                                         <label class="form-label" for="report_date">日付</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <input class="form-control datepicker" type="text" id="report_date" th:field="*{date}"
-                                                   th:errorclass="err">
+                                            <input class="form-control datepicker" type="date" id="report_date" th:field="*{reportDate}"
+                                                   th:errorclass="err" name="reportDate">
+                                            <span th:errors="*{reportDate}" class="text-danger"></span>
+                                            <span th:if="${reportDateError} neq null" th:text="${reportDateError}" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label" for="name">氏名</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <input class="form-control" type="text" th:field="*{name}"
-                                                th:errorclass="err"> <span
-                                                th:errors="*{name}" class="text-danger"></span>
+                                            <span class="form-control" th:text="${report.employee.name}"></span>
+                                            <input type="hidden" th:field="*{employee.name}">
+                                            <input type="hidden" th:field="*{employee.code}">
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -43,22 +43,23 @@
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
                                             <input class="form-control" type="text" th:field="*{title}"
-                                                th:errorclass="err"> <span
-                                                th:errors="*{title}" class="text-danger"></span>
+                                                th:errorclass="err">
+                                                <span th:errors="*{title}" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label" for="content">内容</label>
                                         <p class="mb-1"></p>
-                                        <div class="col-md-4">
-                                            <input class="form-control" type="text" th:field="*{content}"
-                                                th:errorclass="err">
+                                        <div class="col-md-10">
+                                            <textarea class="form-control" th:field="*{content}" th:errorclass="err" id="content"
+                                                name="reportContent" rows="5"></textarea>
+                                            <span th:errors="*{content}" class="text-danger"></span>
                                         </div>
                                     </div>
                                 </div>
                                 <p class="mt-5">
                                     <input type="submit" value="更新" class="btn btn-primary">
-                                    <a th:href="@{/employees}" class="btn btn-primary">戻る</a>
+                                    <a th:href="@{/report/list}" class="btn btn-primary">戻る</a>
                                 </p>
                             </form>
                         </div>
@@ -67,16 +68,5 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-    <script>
-    $(document).ready(function(){
-        $('.datepicker').datepicker({
-            format: 'yyyy-mm-dd',
-            autoclose: true,
-            todayHighlight: true
-        });
-    });
-    </script>
 </body>
 </html>

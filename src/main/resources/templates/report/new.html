@@ -28,15 +28,14 @@
                                             <input class="form-control datepicker" type="date" id="report_date" th:field="*{reportDate}"
                                                    th:errorclass="err" name="reportDate">
                                             <span th:errors="*{reportDate}" class="text-danger"></span>
+                                            <span th:if="${reportDateError} neq null" th:text="${reportDateError}" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label" for="name">氏名</label>
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
-                                            <th:block th:if="${userDetail != null}">
-                                                <span class="form-control" th:text="${userDetail.employee.name}"></span>
-                                            </th:block>
+                                                <span class="form-control" th:text="${report.employee.name}"></span>
                                         </div>
                                     </div>
                                    <div class="mb-3">
@@ -44,8 +43,8 @@
                                         <p class="mb-1"></p>
                                         <div class="col-md-7">
                                             <input class="form-control" type="text" th:field="*{title}"
-                                                th:errorclass="err"> <span
-                                                th:errors="*{title}" class="text-danger"></span>
+                                                th:errorclass="err">
+                                                <span th:errors="*{title}" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="mb-3">

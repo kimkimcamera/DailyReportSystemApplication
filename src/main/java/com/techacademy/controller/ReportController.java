@@ -1,7 +1,7 @@
 package com.techacademy.controller;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,25 +35,28 @@ public class ReportController {
     @GetMapping("/list")
     public String getList(Model model) {
         model.addAttribute("reportList", reportService.findAll());
-        model.addAttribute("report", new Report());
+        model.addAttribute("listSize", reportService.findAll().size());
         return "report/list";
     }
 
     // 日報詳細画面
- // @GetMapping(value = "/{title}/detail")
- // public String getDetail(@PathVariable String title, Model model) {
-
- // model.addAttribute("report", reportService.findByTitle(title));
-//        return "report/detail";
-//    }
+    @GetMapping(value = "/detail/{id}")
+    public String getDetail(@PathVariable Integer id, Model model) {
+    Optional<Report> optionalReport = reportService.findById(id);
+    if (optionalReport.isPresent()) {
+        Report report = optionalReport.get();
+        model.addAttribute("report", report);
+        return "report/detail";
+    } else {
+        // IDに対応するレポートが見つからない場合の処理
+        return "redirect:/report/list";
+    }
+}
 
     //日報新規登録画面
     @GetMapping(value = "/add")
     public String create(@ModelAttribute Report report, @AuthenticationPrincipal UserDetail userDetail, Model model) {
-        Report newReport = new Report();
-        newReport.setEmployee(userDetail.getEmployee());
-        newReport.setEmployeeName(userDetail.getEmployee().getName());
-        model.addAttribute("report", newReport);
+        report.setEmployee(userDetail.getEmployee());
         return "report/new";
     }
 
@@ -62,69 +65,68 @@ public class ReportController {
     public String add(@Validated Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
         // 入力チェック
         if (res.hasErrors()) {
-            //エラーがある場合、新しいReportオブジェクトを作成してフォームに渡す
-            Report newReport = new Report();
-            newReport.setEmployee(userDetail.getEmployee());
-            model.addAttribute("report", newReport);
-            return "report/new";
+            
+            return create(report, userDetail, model);
         }
         
         report.setEmployee(userDetail.getEmployee());
-        ErrorKinds result = reportService.save(report, userDetail);
-        if(result != ErrorKinds.SUCCESS) {
-          //エラーがある場合、新しいReportオブジェクトを作成してフォームに渡す
-            Report newReport = new Report();
-            newReport.setEmployee(userDetail.getEmployee());
-            model.addAttribute("report", newReport);
-            return "report/new";
+        ErrorKinds result = reportService.save(report);
+        if (ErrorMessage.contains(result)) {
+            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+            return create(report, userDetail, model);
         }
 
         return "redirect:/report/list";
     }
 
-//    // 日報削除処理
-//    @PostMapping(value = "/delete")
-//    public String delete(@PathVariable String title, Model model) {
-//
-//        ErrorKinds result = reportService.delete(title, );
-//
-//        if (ErrorMessage.contains(result)) {
-//            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-//            model.addAttribute("report", reportService.findByTitle(title));
-//            return detail(title, model);
-//        }
-//
-//        return "redirect:/report/list";
-//    }
-//    
-//    // 日報情報更新処理
-//    @GetMapping(value = "/update")
-//    public String edit(@PathVariable String content, Model model, Report report) {
-//        if (content != null) {
-//        report = reportService.findByTitle(title);
-//        model.addAttribute("report" ,report);
-//        } else {
-//            model.addAttribute("report" ,report);
-//        }
-//        
-//        return "report/update";
-//        
-//    }
-//    
-//    @PostMapping(value = "/update")
-//    public String update(@PathVariable String title, @Validated Report report, BindingResult res, Model model) {
-//        if (res.hasErrors()) {
-//            return edit(null, model, report);
-//        }
-//        ErrorKinds result = reportService.update(title, report);
-//
-//        if (ErrorMessage.contains(result)) {
-//            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-//            return create(report);
-//        }
-//        return "redirect:/report/list";
-//        
-//    }
+    // 日報削除処理
+    @PostMapping(value = "/{id}/delete")
+    public String delete(@PathVariable Integer id, Model model) {
+
+        ErrorKinds result = reportService.delete(id, null);
+
+        if (ErrorMessage.contains(result)) {
+            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+            model.addAttribute("report", reportService.findById(id).orElse(null));
+            return "report/detail";
+        }
+
+        return "redirect:/report/list";
+    }
+
+    // 日報情報更新処理
+    @GetMapping(value = "/{id}/update")
+    public String edit(@PathVariable Integer id, Model model, UserDetail userDetail) {
+        if (id != null) {
+            Optional<Report> optionalReport = reportService.findById(id);
+            if (optionalReport.isPresent()) {
+                Report report = optionalReport.get();
+                model.addAttribute("report" ,report);
+                return "report/update";
+            } else {
+                return "redirect:/report/list";
+            }
+        }
+        
+        return "report/update";
+    }
+    
+    @PostMapping(value = "/{id}/update")
+    public String update(@ModelAttribute("report") @Validated Report report, BindingResult res, Model model, @AuthenticationPrincipal UserDetail userDetail) {
+        if (res.hasErrors()) {
+            model.addAttribute("report" ,report);
+            return edit(null, model, userDetail);
+        }
+        ErrorKinds result = reportService.update(report.getId(), report, userDetail);
+
+        if (ErrorMessage.contains(result)) {
+            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+            model.addAttribute("report" ,report);
+            return edit(null, model, userDetail);
+        }
+        return "redirect:/report/list";
+        
+    }
     
 }
 
