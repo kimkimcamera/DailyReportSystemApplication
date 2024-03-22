@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.techacademy.constants.ErrorKinds;
+import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
 import com.techacademy.repository.ReportRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ public class ReportService {
     public List<Report> findAll() {
         return reportRepository.findAll();
     }
+    public List<Report> findByEmployee(Employee employee) {
+        return reportRepository.findByEmployee(employee);
+    }
 
     // 日報保存
     @Transactional
@@ -45,7 +49,6 @@ public class ReportService {
             // 既存の日報が存在する場合はエラーを返す
             return ErrorKinds.DATECHECK_ERROR;
         }
-        
         
         //createdAtフィールドに現在の日時をセットする
         report.setCreatedAt(LocalDateTime.now());
@@ -76,7 +79,8 @@ public class ReportService {
             reportRepository.delete(report);
             return ErrorKinds.SUCCESS;
         } else {
-            return ErrorKinds.BLANK_ERROR;
+            return ErrorKinds.BLANK_ERROR; //redirectとしようとしたところ、"型の不一致: String から ErrorKinds には変換できません"というエラーが発生しました。
+                    
         }
             } catch (DataIntegrityViolationException e) {
             return ErrorKinds.BLANK_ERROR;
